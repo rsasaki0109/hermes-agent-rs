@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>hermes-agent-rs</title>
+    <meta
+      name="description"
+      content="Minimal Rust CLI agent: OpenAI-compatible and Anthropic APIs, tools, memory, skills."
+    />
+    <link rel="stylesheet" href="assets/style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>hermes-agent-rs</h1>
+        <p class="tagline">
+          Minimal Rust port of
+          <a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a>
+          — CLI, tools, optional file memory &amp; skills.
+        </p>
+      </header>
+
+      <section class="card">
+        <h2>Install</h2>
+        <p>From source (Rust toolchain required):</p>
+        <pre class="code">git clone https://github.com/rsasaki0109/hermes-agent-rs.git
+cd hermes-agent-rs
+cargo build --release</pre>
+        <p>
+          Crates.io (after <code>cargo publish</code>):
+          <code>cargo install hermes-agent-rs</code>
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>Run</h2>
+        <pre class="code">cp config.example.yaml config.yaml
+# set API keys per provider
+cargo run --release -- run config.yaml</pre>
+        <p>Type <code>:quit</code> to exit the REPL.</p>
+      </section>
+
+      <section class="card">
+        <h2>Docs</h2>
+        <p>
+          README, design notes, and roadmap live in the repo. This page is the
+          lightweight “dogfood” landing we point people at from releases.
+        </p>
+        <div class="actions">
+          <a class="btn primary" href="https://github.com/rsasaki0109/hermes-agent-rs">Repository</a>
+          <a class="btn" href="https://github.com/rsasaki0109/hermes-agent-rs/releases/latest">Latest release</a>
+          <a class="btn" href="https://github.com/rsasaki0109/hermes-agent-rs/blob/main/README.md">README</a>
+        </div>
+      </section>
+
+      <footer>
+        Apache-2.0 ·
+        <a href="https://github.com/rsasaki0109/hermes-agent-rs/blob/main/LICENSE">License</a>
+      </footer>
+    </div>
+  </body>
+</html>
