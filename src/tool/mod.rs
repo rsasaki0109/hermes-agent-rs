@@ -31,7 +31,9 @@ impl std::fmt::Debug for ToolRegistry {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut names: Vec<&str> = self.tools.keys().map(|s| s.as_str()).collect();
         names.sort();
-        f.debug_struct("ToolRegistry").field("tools", &names).finish()
+        f.debug_struct("ToolRegistry")
+            .field("tools", &names)
+            .finish()
     }
 }
 

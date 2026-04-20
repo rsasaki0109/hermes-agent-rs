@@ -49,11 +49,7 @@ pub async fn run(config_path: PathBuf) -> anyhow::Result<()> {
     let system_prompt = if skills.is_empty() {
         cfg.system_prompt.clone()
     } else {
-        format!(
-            "{}\n\n{}",
-            cfg.system_prompt,
-            skills.render_system_suffix()
-        )
+        format!("{}\n\n{}", cfg.system_prompt, skills.render_system_suffix())
     };
 
     let mut agent = Agent::new(
@@ -112,15 +108,13 @@ pub async fn run(config_path: PathBuf) -> anyhow::Result<()> {
 pub fn build_llm_client(cfg: &ModelConfig) -> anyhow::Result<Arc<dyn LlmClient>> {
     match cfg.provider.as_str() {
         "openai" => {
-            let key = std::env::var(&cfg.api_key_env).with_context(|| {
-                format!("env var `{}` not set", cfg.api_key_env)
-            })?;
+            let key = std::env::var(&cfg.api_key_env)
+                .with_context(|| format!("env var `{}` not set", cfg.api_key_env))?;
             Ok(Arc::new(OpenAiClient::new(cfg.base_url.clone(), key)))
         }
         "anthropic" => {
-            let key = std::env::var(&cfg.api_key_env).with_context(|| {
-                format!("env var `{}` not set", cfg.api_key_env)
-            })?;
+            let key = std::env::var(&cfg.api_key_env)
+                .with_context(|| format!("env var `{}` not set", cfg.api_key_env))?;
             Ok(Arc::new(AnthropicClient::new(cfg.base_url.clone(), key)))
         }
         other => anyhow::bail!("unknown provider: {}", other),

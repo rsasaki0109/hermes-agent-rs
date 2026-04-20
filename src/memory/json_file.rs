@@ -20,9 +20,8 @@ impl JsonFileStore {
             if text.trim().is_empty() {
                 HashMap::new()
             } else {
-                serde_json::from_str(&text).map_err(|e| {
-                    anyhow::anyhow!("corrupt memory file {}: {e}", path.display())
-                })?
+                serde_json::from_str(&text)
+                    .map_err(|e| anyhow::anyhow!("corrupt memory file {}: {e}", path.display()))?
             }
         } else {
             HashMap::new()

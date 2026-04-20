@@ -45,11 +45,17 @@ impl Tool for ReadFileTool {
 /// at cwd; does not require the target to exist yet.
 pub(crate) fn resolve_within_cwd(path: &Path) -> anyhow::Result<PathBuf> {
     if path.is_absolute() {
-        anyhow::bail!("absolute paths escape working directory: {}", path.display());
+        anyhow::bail!(
+            "absolute paths escape working directory: {}",
+            path.display()
+        );
     }
     for comp in path.components() {
         if matches!(comp, Component::ParentDir) {
-            anyhow::bail!("path escapes working directory (parent reference): {}", path.display());
+            anyhow::bail!(
+                "path escapes working directory (parent reference): {}",
+                path.display()
+            );
         }
     }
     let cwd = std::env::current_dir()?;

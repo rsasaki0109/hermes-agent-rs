@@ -99,10 +99,7 @@ async fn bash_call_bails_without_env() {
     let _g = BASH_ENV_MUTEX.lock().await;
     std::env::remove_var("BASH_ALLOW_EXECUTE");
     let t = BashTool;
-    let err = t
-        .call(json!({"command": "echo hi"}))
-        .await
-        .unwrap_err();
+    let err = t.call(json!({"command": "echo hi"})).await.unwrap_err();
     assert!(err.to_string().contains("BASH_ALLOW_EXECUTE"));
 }
 
@@ -163,7 +160,10 @@ async fn memory_tool_set_get_list_delete() {
     let mem: Arc<dyn Memory> = Arc::new(InMemoryStore::new());
     let tool = MemoryTool { memory: mem };
 
-    let set = tool.call(json!({"op": "set", "key": "k", "value": "v"})).await.unwrap();
+    let set = tool
+        .call(json!({"op": "set", "key": "k", "value": "v"}))
+        .await
+        .unwrap();
     assert_eq!(set, r#"{"ok":true}"#);
 
     let got = tool.call(json!({"op": "get", "key": "k"})).await.unwrap();
@@ -172,7 +172,10 @@ async fn memory_tool_set_get_list_delete() {
     let list = tool.call(json!({"op": "list"})).await.unwrap();
     assert_eq!(list, r#"{"keys":["k"]}"#);
 
-    let del = tool.call(json!({"op": "delete", "key": "k"})).await.unwrap();
+    let del = tool
+        .call(json!({"op": "delete", "key": "k"}))
+        .await
+        .unwrap();
     assert_eq!(del, r#"{"ok":true}"#);
 
     let got2 = tool.call(json!({"op": "get", "key": "k"})).await.unwrap();

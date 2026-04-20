@@ -1,9 +1,15 @@
 [package]
 name = "hermes-agent-rs"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "Minimal Rust port of Nous Research's Hermes Agent (CLI-only, OpenAI-compatible)."
 license = "Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/rsasaki0109/hermes-agent-rs"
+homepage = "https://github.com/rsasaki0109/hermes-agent-rs"
+keywords = ["llm", "agent", "cli", "openai", "anthropic"]
+categories = ["command-line-utilities", "asynchronous"]
+exclude = [".github/"]
 
 [dependencies]
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "io-std", "sync", "fs", "process"] }

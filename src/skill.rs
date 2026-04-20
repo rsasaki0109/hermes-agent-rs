@@ -85,7 +85,9 @@ impl SkillRegistry {
 }
 
 fn extract_frontmatter(text: &str) -> Option<(&str, &str)> {
-    let text = text.strip_prefix("---\n").or_else(|| text.strip_prefix("---\r\n"))?;
+    let text = text
+        .strip_prefix("---\n")
+        .or_else(|| text.strip_prefix("---\r\n"))?;
     let (end, sep_len) = if let Some(i) = text.find("\n---\n") {
         (i, 5)
     } else if let Some(i) = text.find("\r\n---\r\n") {

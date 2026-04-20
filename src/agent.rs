@@ -61,7 +61,11 @@ impl Agent {
 
     pub async fn step(&mut self) -> anyhow::Result<StepOutcome> {
         let req = self.build_request();
-        tracing::debug!(messages = req.messages.len(), tools = req.tools.len(), "llm request");
+        tracing::debug!(
+            messages = req.messages.len(),
+            tools = req.tools.len(),
+            "llm request"
+        );
         let resp = self.llm.chat(req).await?;
         tracing::debug!(?resp.finish_reason, "llm response");
         self.history.push(resp.message.clone());
@@ -74,11 +78,7 @@ impl Agent {
                         .get(&call.name)
                         .ok_or_else(|| anyhow::anyhow!("unknown tool: {}", call.name))?;
                     let span = tracing::info_span!("tool", name = %call.name);
-                    let result = match tool
-                        .call(call.arguments.clone())
-                        .instrument(span)
-                        .await
-                    {
+                    let result = match tool.call(call.arguments.clone()).instrument(span).await {
                         Ok(s) => s,
                         Err(e) => {
                             tracing::warn!(tool = %call.name, error = %e, "tool failed");

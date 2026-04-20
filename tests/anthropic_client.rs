@@ -117,10 +117,7 @@ async fn anthropic_request_includes_system_and_max_tokens() {
     client
         .chat(ChatRequest {
             model: "m".into(),
-            messages: vec![
-                Message::system("You are Hermes"),
-                Message::user("ping"),
-            ],
+            messages: vec![Message::system("You are Hermes"), Message::user("ping")],
             tools: vec![],
             temperature: None,
         })

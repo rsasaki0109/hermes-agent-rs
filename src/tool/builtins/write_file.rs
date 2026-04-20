@@ -3,8 +3,8 @@ use std::path::Path;
 use async_trait::async_trait;
 use serde_json::json;
 
-use crate::tool::Tool;
 use crate::tool::builtins::read_file::resolve_within_cwd;
+use crate::tool::Tool;
 
 pub struct WriteFileTool;
 

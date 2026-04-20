@@ -25,7 +25,9 @@ pub struct Config {
 pub enum MemoryConfig {
     #[default]
     InMemory,
-    JsonFile { path: PathBuf },
+    JsonFile {
+        path: PathBuf,
+    },
 }
 
 #[derive(Debug, Clone, Deserialize)]

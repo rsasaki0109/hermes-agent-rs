@@ -114,9 +114,10 @@ fn message_to_anthropic(m: &Message) -> anyhow::Result<Value> {
             }
         }
         Role::Tool => {
-            let tool_use_id = m.tool_call_id.as_deref().ok_or_else(|| {
-                LlmError::Decode("tool message missing tool_call_id".into())
-            })?;
+            let tool_use_id = m
+                .tool_call_id
+                .as_deref()
+                .ok_or_else(|| LlmError::Decode("tool message missing tool_call_id".into()))?;
             Ok(json!({
                 "role": "user",
                 "content": [{
@@ -241,10 +242,7 @@ mod tests {
 
     #[test]
     fn split_pulls_system() {
-        let msgs = vec![
-            Message::system("sys"),
-            Message::user("hi"),
-        ];
+        let msgs = vec![Message::system("sys"), Message::user("hi")];
         let (s, rest) = split_system_and_messages(&msgs).unwrap();
         assert_eq!(s, "sys");
         assert_eq!(rest.len(), 1);
@@ -276,6 +274,9 @@ mod tests {
         assert_eq!(parsed.message.tool_calls.len(), 1);
         assert_eq!(parsed.message.tool_calls[0].id, "tu_1");
         assert_eq!(parsed.message.tool_calls[0].name, "echo");
-        assert_eq!(parsed.message.tool_calls[0].arguments, json!({"text": "hi"}));
+        assert_eq!(
+            parsed.message.tool_calls[0].arguments,
+            json!({"text": "hi"})
+        );
     }
 }

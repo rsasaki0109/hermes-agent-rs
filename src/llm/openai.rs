@@ -27,7 +27,10 @@ impl OpenAiClient {
 #[async_trait]
 impl LlmClient for OpenAiClient {
     async fn chat(&self, req: ChatRequest) -> anyhow::Result<ChatResponse> {
-        let url = format!("{}/v1/chat/completions", self.base_url.trim_end_matches('/'));
+        let url = format!(
+            "{}/v1/chat/completions",
+            self.base_url.trim_end_matches('/')
+        );
         let body = build_request_body(&req);
         tracing::debug!(%url, "openai chat request");
 
