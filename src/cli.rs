@@ -1,21 +1,24 @@
 use std::path::PathBuf;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use anyhow::Context;
 use clap::{Parser, Subcommand};
-use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+use rustyline::error::ReadlineError;
+use rustyline::DefaultEditor;
 
 use crate::agent::Agent;
-use crate::config::{Config, ModelConfig};
-use crate::skill::SkillRegistry;
+use crate::config::{Config, MemoryConfig, ModelConfig};
 use crate::llm::{AnthropicClient, LlmClient, OpenAiClient};
-use crate::config::MemoryConfig;
 use crate::memory::{InMemoryStore, JsonFileStore, Memory};
+use crate::skill::SkillRegistry;
 use crate::tool::builtins;
 
 #[derive(Parser, Debug)]
 #[command(name = "hermes-agent-rs", version, about)]
 pub struct Cli {
+    /// Enable debug logging (default is info, or RUST_LOG when set without --verbose).
+    #[arg(short, long, global = true)]
+    pub verbose: bool,
     #[command(subcommand)]
     pub cmd: Cmd,
 }
@@ -63,19 +66,29 @@ pub async fn run(config_path: PathBuf) -> anyhow::Result<()> {
         cfg.temperature,
     );
 
-    let stdin = tokio::io::stdin();
-    let mut stdout = tokio::io::stdout();
-    let mut reader = BufReader::new(stdin).lines();
-
-    stdout.write_all(b"hermes-agent-rs | type ':quit' or Ctrl-D to exit\n").await?;
+    println!("hermes-agent-rs | type ':quit' or Ctrl-D to exit");
+    let editor = Arc::new(Mutex::new(DefaultEditor::new()?));
     loop {
-        stdout.write_all(b"> ").await?;
-        stdout.flush().await?;
+        let read_result = tokio::task::spawn_blocking({
+            let editor = editor.clone();
+            move || {
+                let mut rl = editor.lock().expect("line editor mutex poisoned");
+                rl.readline("> ")
+            }
+        })
+        .await
+        .map_err(|e| anyhow::anyhow!("readline join: {e}"))?;
 
-        let line = match reader.next_line().await? {
-            Some(l) => l,
-            None => break,
+        let line = match read_result {
+            Ok(l) => l,
+            Err(ReadlineError::Interrupted) => {
+                println!("^C");
+                break;
+            }
+            Err(ReadlineError::Eof) => break,
+            Err(e) => return Err(e.into()),
         };
+
         let trimmed = line.trim();
         if trimmed.is_empty() {
             continue;
@@ -86,17 +99,12 @@ pub async fn run(config_path: PathBuf) -> anyhow::Result<()> {
 
         match agent.run_user_input(trimmed).await {
             Ok(reply) => {
-                stdout.write_all(b"[assistant] ").await?;
-                stdout.write_all(reply.as_bytes()).await?;
-                stdout.write_all(b"\n").await?;
+                println!("[assistant] {reply}");
             }
             Err(e) => {
-                stdout
-                    .write_all(format!("[error] {e}\n").as_bytes())
-                    .await?;
+                eprintln!("[error] {e}");
             }
         }
-        stdout.flush().await?;
     }
     Ok(())
 }

@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use anyhow::bail;
+use tracing::Instrument;
 
 use crate::llm::{ChatRequest, FinishReason, LlmClient};
 use crate::memory::Memory;
@@ -72,7 +73,12 @@ impl Agent {
                         .tools
                         .get(&call.name)
                         .ok_or_else(|| anyhow::anyhow!("unknown tool: {}", call.name))?;
-                    let result = match tool.call(call.arguments.clone()).await {
+                    let span = tracing::info_span!("tool", name = %call.name);
+                    let result = match tool
+                        .call(call.arguments.clone())
+                        .instrument(span)
+                        .await
+                    {
                         Ok(s) => s,
                         Err(e) => {
                             tracing::warn!(tool = %call.name, error = %e, "tool failed");
