@@ -1,0 +1,11 @@
+model:
+  provider: openai
+  base_url: https://api.openai.com
+  api_key_env: OPENAI_API_KEY
+  name: gpt-4o-mini
+system_prompt: |
+  You are Hermes, a concise assistant. Prefer tools over guessing.
+  Use memory to persist small facts across turns.
+tools: [echo, read_file, write_file, memory]
+max_steps: 8
+temperature: 0.2
