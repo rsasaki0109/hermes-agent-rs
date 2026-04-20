@@ -9,7 +9,7 @@ repository = "https://github.com/rsasaki0109/hermes-agent-rs"
 homepage = "https://github.com/rsasaki0109/hermes-agent-rs"
 keywords = ["llm", "agent", "cli", "openai", "anthropic"]
 categories = ["command-line-utilities", "asynchronous"]
-exclude = [".github/", "docs/"]
+exclude = [".github/", "docs/", "assets/"]
 
 [dependencies]
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "io-std", "sync", "fs", "process"] }

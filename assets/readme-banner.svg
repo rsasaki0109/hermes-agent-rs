@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="200" viewBox="0 0 880 200" role="img" aria-label="hermes-agent-rs">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#121a22"/>
+      <stop offset="100%" style="stop-color:#0d2438"/>
+    </linearGradient>
+  </defs>
+  <rect width="880" height="200" rx="16" fill="url(#bg)"/>
+  <rect x="2" y="2" width="876" height="196" rx="14" fill="none" stroke="#2a3f55" stroke-width="2" opacity="0.7"/>
+  <!-- simple wing / message motif -->
+  <path d="M 64 100 Q 110 55 156 100 Q 110 145 64 100" fill="none" stroke="#3d9aed" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+  <path d="M 82 100 L 138 100" stroke="#6eb6f7" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+  <circle cx="164" cy="100" r="8" fill="#3d9aed" opacity="0.95"/>
+  <text x="208" y="108" fill="#e8eef4" font-family="ui-sans-serif,system-ui,Segoe UI,Helvetica,Arial,sans-serif" font-size="38" font-weight="650" letter-spacing="-0.03em">hermes-agent-rs</text>
+  <text x="208" y="148" fill="#8fa3b5" font-family="ui-sans-serif,system-ui,Segoe UI,Helvetica,Arial,sans-serif" font-size="16.5" font-weight="400">Rust CLI agent · OpenAI-compatible &amp; Anthropic · tools, memory, skills</text>
+</svg>

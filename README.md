@@ -1,5 +1,9 @@
 # hermes-agent-rs
 
+<p align="center">
+  <img src="./assets/readme-banner.svg" alt="hermes-agent-rs — Rust CLI agent for OpenAI-compatible and Anthropic APIs" width="880" />
+</p>
+
 Minimal Rust port of [Hermes Agent](https://github.com/NousResearch/hermes-agent). CLI-only, with OpenAI-compatible chat and an Anthropic Messages API client. See [`DESIGN.md`](./DESIGN.md) for architecture; [`PLAN.md`](./PLAN.md) tracks roadmap and [`CHANGELOG.md`](./CHANGELOG.md) lists releases.
 
 **Landing (dogfood site):** after [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site) is set to **GitHub Actions**, the workflow [`.github/workflows/pages.yml`](./.github/workflows/pages.yml) publishes [`docs/`](./docs/) to **https://rsasaki0109.github.io/hermes-agent-rs/** (enable *Settings → Pages → Build: GitHub Actions* once if the site is empty).
