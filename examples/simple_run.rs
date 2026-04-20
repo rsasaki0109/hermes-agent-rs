@@ -32,7 +32,8 @@ async fn main() -> anyhow::Result<()> {
     let llm = Arc::new(MockLlm::new(responses));
 
     let memory: Arc<dyn Memory> = Arc::new(InMemoryStore::new());
-    let tools = builtins::build_registry(&["echo".into()], memory.clone())?;
+    let tools =
+        builtins::build_registry(&["echo".into()], memory.clone(), &builtins::BuildOpts::default())?;
 
     let mut agent = Agent::new(
         "You are a test assistant.".into(),

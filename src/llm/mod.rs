@@ -3,9 +3,11 @@ use async_trait::async_trait;
 use crate::message::Message;
 use crate::tool::ToolSchema;
 
+pub mod anthropic;
 pub mod mock;
 pub mod openai;
 
+pub use anthropic::AnthropicClient;
 pub use mock::MockLlm;
 pub use openai::OpenAiClient;
 

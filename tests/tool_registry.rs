@@ -1,11 +1,18 @@
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
 
 use serde_json::json;
 use tempfile::TempDir;
+use tokio::sync::Mutex;
 
 use hermes_agent_rs::memory::{InMemoryStore, Memory};
-use hermes_agent_rs::tool::builtins::{build_registry, EchoTool, MemoryTool, ReadFileTool, WriteFileTool};
+use hermes_agent_rs::tool::builtins::{
+    build_registry, BashTool, BuildOpts, EchoTool, GrepTool, ListDirTool, MemoryTool, ReadFileTool,
+    WriteFileTool,
+};
 use hermes_agent_rs::tool::Tool;
+
+static BASH_ENV_MUTEX: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
+static CWD_MUTEX: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
 
 #[tokio::test]
 async fn build_registry_happy_path() {
@@ -18,6 +25,7 @@ async fn build_registry_happy_path() {
             "memory".into(),
         ],
         mem,
+        &BuildOpts::default(),
     )
     .unwrap();
     let schemas = reg.schemas();
@@ -29,8 +37,86 @@ async fn build_registry_happy_path() {
 #[tokio::test]
 async fn build_registry_rejects_unknown() {
     let mem: Arc<dyn Memory> = Arc::new(InMemoryStore::new());
-    let err = build_registry(&["nonexistent".into()], mem).unwrap_err();
+    let err = build_registry(&["nonexistent".into()], mem, &BuildOpts::default()).unwrap_err();
     assert!(err.to_string().contains("unknown builtin tool"));
+}
+
+#[tokio::test]
+async fn build_registry_rejects_bash_without_allow_bash() {
+    let mem: Arc<dyn Memory> = Arc::new(InMemoryStore::new());
+    let err = build_registry(&["bash".into()], mem, &BuildOpts::default()).unwrap_err();
+    assert!(err.to_string().contains("allow_bash"));
+}
+
+#[tokio::test]
+async fn list_dir_lists_src_like_tree() {
+    let _cwd = CWD_MUTEX.lock().await;
+    let dir = TempDir::new().unwrap();
+    let prev = std::env::current_dir().unwrap();
+    std::env::set_current_dir(dir.path()).unwrap();
+    tokio::fs::create_dir("src").await.unwrap();
+    tokio::fs::write("src/main.rs", "// x").await.unwrap();
+
+    let t = ListDirTool;
+    let out = t
+        .call(json!({"path": "src", "max_entries": 200}))
+        .await
+        .unwrap();
+
+    std::env::set_current_dir(&prev).unwrap();
+
+    assert!(out.contains("main.rs"));
+    assert!(out.contains("\"kind\":\"file\""));
+}
+
+#[tokio::test]
+async fn grep_finds_literal_in_file() {
+    let _cwd = CWD_MUTEX.lock().await;
+    let dir = TempDir::new().unwrap();
+    let prev = std::env::current_dir().unwrap();
+    std::env::set_current_dir(dir.path()).unwrap();
+    tokio::fs::write(
+        "Cargo.toml",
+        "name = \"hermes-agent-rs\"\nversion = \"0.1.0\"\n",
+    )
+    .await
+    .unwrap();
+
+    let t = GrepTool;
+    let out = t
+        .call(json!({"pattern": "hermes-agent-rs", "path": "Cargo.toml", "max_matches": 50}))
+        .await
+        .unwrap();
+
+    std::env::set_current_dir(&prev).unwrap();
+
+    assert!(out.contains("hermes-agent-rs"));
+    assert!(out.contains("\"matches\""));
+}
+
+#[tokio::test]
+async fn bash_call_bails_without_env() {
+    let _g = BASH_ENV_MUTEX.lock().await;
+    std::env::remove_var("BASH_ALLOW_EXECUTE");
+    let t = BashTool;
+    let err = t
+        .call(json!({"command": "echo hi"}))
+        .await
+        .unwrap_err();
+    assert!(err.to_string().contains("BASH_ALLOW_EXECUTE"));
+}
+
+#[tokio::test]
+async fn bash_echo_when_env_and_config_allow() {
+    let _g = BASH_ENV_MUTEX.lock().await;
+    std::env::set_var("BASH_ALLOW_EXECUTE", "1");
+    let t = BashTool;
+    let out = t.call(json!({"command": "echo hi"})).await.unwrap();
+    std::env::remove_var("BASH_ALLOW_EXECUTE");
+
+    let v: serde_json::Value = serde_json::from_str(&out).unwrap();
+    assert_eq!(v["stdout"].as_str().unwrap(), "hi\n");
+    assert_eq!(v["timed_out"], false);
 }
 
 #[tokio::test]
@@ -49,6 +135,7 @@ async fn read_file_rejects_path_traversal() {
 
 #[tokio::test]
 async fn write_then_read_roundtrip() {
+    let _cwd = CWD_MUTEX.lock().await;
     let dir = TempDir::new().unwrap();
     let prev = std::env::current_dir().unwrap();
     std::env::set_current_dir(dir.path()).unwrap();

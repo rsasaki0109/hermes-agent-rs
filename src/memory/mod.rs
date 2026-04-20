@@ -1,8 +1,10 @@
 use async_trait::async_trait;
 
 pub mod in_memory;
+pub mod json_file;
 
 pub use in_memory::InMemoryStore;
+pub use json_file::JsonFileStore;
 
 #[async_trait]
 pub trait Memory: Send + Sync {

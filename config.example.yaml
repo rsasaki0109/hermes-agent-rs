@@ -9,3 +9,11 @@ system_prompt: |
 tools: [echo, read_file, write_file, memory]
 max_steps: 8
 temperature: 0.2
+
+# Persist memory to disk (optional):
+# memory:
+#   kind: json_file
+#   path: .hermes/memory.json
+
+# Optional skills (directories under this path with skill.md):
+# skills_dir: ./skills

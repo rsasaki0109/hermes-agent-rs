@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use serde::Deserialize;
 
@@ -12,6 +12,20 @@ pub struct Config {
     pub max_steps: usize,
     #[serde(default)]
     pub temperature: Option<f32>,
+    #[serde(default)]
+    pub allow_bash: bool,
+    #[serde(default)]
+    pub memory: MemoryConfig,
+    #[serde(default)]
+    pub skills_dir: Option<PathBuf>,
+}
+
+#[derive(Debug, Clone, Deserialize, Default)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+pub enum MemoryConfig {
+    #[default]
+    InMemory,
+    JsonFile { path: PathBuf },
 }
 
 #[derive(Debug, Clone, Deserialize)]

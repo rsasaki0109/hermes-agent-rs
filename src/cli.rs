@@ -7,8 +7,10 @@ use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 
 use crate::agent::Agent;
 use crate::config::{Config, ModelConfig};
-use crate::llm::{LlmClient, OpenAiClient};
-use crate::memory::{InMemoryStore, Memory};
+use crate::skill::SkillRegistry;
+use crate::llm::{AnthropicClient, LlmClient, OpenAiClient};
+use crate::config::MemoryConfig;
+use crate::memory::{InMemoryStore, JsonFileStore, Memory};
 use crate::tool::builtins;
 
 #[derive(Parser, Debug)]
@@ -28,11 +30,31 @@ pub async fn run(config_path: PathBuf) -> anyhow::Result<()> {
     let cfg = Config::from_path(&config_path)?;
 
     let llm = build_llm_client(&cfg.model)?;
-    let memory: Arc<dyn Memory> = Arc::new(InMemoryStore::new());
-    let tools = builtins::build_registry(&cfg.tools, memory.clone())?;
+    let memory: Arc<dyn Memory> = match &cfg.memory {
+        MemoryConfig::InMemory => Arc::new(InMemoryStore::new()),
+        MemoryConfig::JsonFile { path } => Arc::new(JsonFileStore::open(path).await?),
+    };
+    let opts = builtins::BuildOpts {
+        allow_bash: cfg.allow_bash,
+    };
+    let tools = builtins::build_registry(&cfg.tools, memory.clone(), &opts)?;
+
+    let skills = match &cfg.skills_dir {
+        Some(d) if d.exists() => SkillRegistry::load_dir(d)?,
+        _ => SkillRegistry::empty(),
+    };
+    let system_prompt = if skills.is_empty() {
+        cfg.system_prompt.clone()
+    } else {
+        format!(
+            "{}\n\n{}",
+            cfg.system_prompt,
+            skills.render_system_suffix()
+        )
+    };
 
     let mut agent = Agent::new(
-        cfg.system_prompt.clone(),
+        system_prompt,
         llm,
         tools,
         memory,
@@ -86,6 +108,12 @@ pub fn build_llm_client(cfg: &ModelConfig) -> anyhow::Result<Arc<dyn LlmClient>>
                 format!("env var `{}` not set", cfg.api_key_env)
             })?;
             Ok(Arc::new(OpenAiClient::new(cfg.base_url.clone(), key)))
+        }
+        "anthropic" => {
+            let key = std::env::var(&cfg.api_key_env).with_context(|| {
+                format!("env var `{}` not set", cfg.api_key_env)
+            })?;
+            Ok(Arc::new(AnthropicClient::new(cfg.base_url.clone(), key)))
         }
         other => anyhow::bail!("unknown provider: {}", other),
     }

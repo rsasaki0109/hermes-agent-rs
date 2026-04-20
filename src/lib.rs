@@ -7,4 +7,5 @@ pub mod error;
 pub mod llm;
 pub mod memory;
 pub mod message;
+pub mod skill;
 pub mod tool;
