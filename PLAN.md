@@ -60,6 +60,21 @@ hermes-agent-rs/
 └── examples/simple_run.rs
 ```
 
+### 0.5 v0.2 リリース時点の状態（2026-04-20）
+
+[CHANGELOG.md](./CHANGELOG.md) の **0.2.0** 相当。Git タグ **`v0.2.0`** / GitHub Release あり。PLAN の **Task A〜E** は実装済み（詳細手順は下記 §2 以降に残す）。
+
+| 領域 | 追加点 |
+|------|--------|
+| LLM | `AnthropicClient`（`src/llm/anthropic.rs`）、`provider: anthropic` |
+| ツール | `list_dir`, `grep`, `bash`（`allow_bash` + `BASH_ALLOW_EXECUTE`） |
+| Memory | `JsonFileStore` + `MemoryConfig`（`kind: json_file`） |
+| Skills | `SkillRegistry`（`src/skill.rs`）、任意 `skills_dir` |
+| CLI | `rustyline`、`--verbose`、tool 呼び出しの `tracing` span |
+| 公開まわり | GitHub Actions（`ci.yml`, `pages.yml`）、`docs/` 静的サイト、`assets/readme-banner.svg` |
+
+**crates.io**: `cargo publish` は `cargo login` 済みの環境で実行（トークンは CI に載せない）。
+
 ---
 
 ## 1. v0.2 の大方針
